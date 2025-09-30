@@ -1,7 +1,19 @@
 name: Testing Second Action
-on: [workflow_dispatch,push]
+on: 
+    workflow_dispatch:
+        inputs:
+            node-version:
+                description: "Choose node version"
+                required: false
+                type: choice
+                options:
+                    - 18.x
+                    - 20.x
+                    - 21.x
+                default: 20.x
 jobs:
     test:
+        environment: development
         runs-on: ubuntu-latest
         steps:
             - name: Get code
@@ -9,12 +21,13 @@ jobs:
             - name: Install NodeJS
               uses: actions/setup-node@v5
               with:
-                node-version: 18
+                node-version: '${{github.event.inputs.node-version}}'
             - name: Install dependencies
               run: npm install
             - name: Run tests
               run: npm test
     deploy:
+        environment: Development
         needs: test
         runs-on: ubuntu-latest
         steps:
@@ -30,4 +43,4 @@ jobs:
               run: npm run build
             - name: Deploying
               run: |
-                echo "Deploying..."
+                echo "${{env.AWS_SECRET_KEY}}"
